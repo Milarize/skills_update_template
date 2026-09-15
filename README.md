@@ -1,9 +1,11 @@
 # Project 4 — Claude Code Skills
 
 รวม Claude Code Skills ที่ใช้ร่วมกันได้ทุกโปรเจกต์ที่ derive มาจาก template
-กลางของ Project 4 (api-gateway, api-internal, ฯลฯ) โฟลเดอร์นี้เป็น
-"ต้นทาง" สำหรับ copy skill เข้า template repo หรือโปรเจกต์ใดโปรเจกต์หนึ่ง
-โดยตรง ไม่ใช่โปรเจกต์ที่รันแอปจริง จึงไม่มี `package.json`/source code อื่น
+กลางของ Project 4 (api-app, api-internal, ฯลฯ) โฟลเดอร์นี้เป็นแค่
+"ต้นทาง" (source of truth) สำหรับเก็บโค้ด skill ไว้ ไม่ใช่โปรเจกต์ที่รันแอปจริง
+จึงไม่มี `package.json`/source code อื่น และ**ไม่ครอบคลุมขั้นตอนนำ skill
+เข้า template repo กลางแต่ละตัว** (api-app, api-internal, ...) — นั่นเป็น
+กระบวนการของผู้ดูแล template repo แต่ละตัวเอง อยู่นอกขอบเขตของเอกสารนี้
 
 **(สำหรับคนที่ไม่เคยใช้ Claude Code Skills มาก่อนเลย อ่านตั้งแต่ต้นจนจบแล้วทำตามได้เลย)**
 
@@ -35,74 +37,7 @@
 
 ---
 
-## 1. สำหรับผู้ดูแล template — อัป skill ขึ้น template repo กลาง
-
-ทำครั้งเดียวต่อ skill ที่สร้างใหม่ หรือทุกครั้งที่แก้ไข skill เดิมในโฟลเดอร์นี้
-ถ้ามี template repo หลายตัว (api-gateway, api-internal, ...) ต้องทำซ้ำ
-ขั้นตอนนี้กับทุกตัวที่ต้องการให้มี skill นี้
-
-### ขั้นตอน
-
-1. **Clone (หรือเปิด) template repo ที่ใช้เป็นต้นแบบ** (เช่น `api-internal`)
-   คนละ working directory กับโฟลเดอร์ skills นี้และกับโปรเจกต์ลูกใด ๆ —
-   **ห้าม** push ตรง ๆ จากโปรเจกต์ลูก เพราะจะดึง history ของโปรเจกต์ลูก
-   ติดไปด้วย
-
-   ```bash
-   git clone {template-repository-url}
-   cd {template-project-directory}
-   git checkout develop
-   ```
-
-2. **Copy โฟลเดอร์ skill ทั้งโฟลเดอร์** จาก `skills_2569/` ไปวางที่ root ของ
-   template repo โดยให้ path ตรงกันเป๊ะ เช่นสำหรับ `template-update`:
-
-   ```
-   .claude/skills/template-update/SKILL.md
-   .claude/skills/template-update/scripts/check-updates.mjs
-   .claude/skills/template-update/scripts/apply-config.mjs
-   ```
-
-3. **Commit และ push ขึ้น branch พัฒนาของ template** (เช่น `develop`)
-
-   ```bash
-   git add .claude/skills/template-update
-   git commit -m "Add template-update skill"
-   git push origin develop
-   ```
-
-4. **สร้าง tag เวอร์ชันใหม่ผ่าน GitLab UI เท่านั้น** (ตามกติกาเดิมของ
-   template repo: *"ไม่ควร push tag จาก Git local repository เพื่อป้องกัน
-   การเผลอ push tag ของ template ให้สร้าง tag บน Git remote repository
-   เท่านั้น"*) เช่นตั้งชื่อ tag ใหม่ต่อจาก tag ล่าสุดที่มีอยู่
-
-5. **แจ้งทีม** ว่ามี template version ใหม่ และมี skill อะไรใหม่เพิ่มเข้ามา
-   (จะได้ไม่ต้องมานั่งงมว่าทำไม repo ตัวเองมีโฟลเดอร์ `.claude/skills/`
-   โผล่มาตอน merge)
-
-> **หมายเหตุ:** ขั้นตอนนี้เหมือนกับการอัปเดตไฟล์อื่น ๆ ของ template ทุก
-> ประการ เพราะ skill ก็เป็นแค่ไฟล์ในโปรเจกต์ ไม่มีขั้นตอน "publish" พิเศษ
-> แยกต่างหาก — สิ่งที่ทำให้มันกลายเป็น "skill" คือ Claude Code อ่านไฟล์
-> `.claude/skills/*/SKILL.md` เองอัตโนมัติเมื่อเปิดโปรเจกต์ และขั้นตอนนี้
-> เป็นสิ่งที่ **มนุษย์ทำเองด้วยมือ** ไม่ใช่สิ่งที่ตัว skill สั่งให้ Claude
-> ทำอัตโนมัติ (ดู "ขอบเขตสำคัญ" ด้านบน)
-
-### อยากให้ทีมทดลองก่อน โดยยังไม่เข้า template repo กลาง
-
-ถ้ายังไม่อยากแตะ template repo กลาง ให้ทำแบบ "ทดสอบก่อน" แทน — เลือกวิธี
-ใดวิธีหนึ่ง:
-
-- **Push โฟลเดอร์นี้ขึ้น git repo ของตัวเอง** (เช่น repo `skills_2569` แยก
-  ต่างหาก หรือ branch ทดลองในโปรเจกต์ใดโปรเจกต์หนึ่ง) แล้วให้ทีม
-  `git clone`/`git pull` มาลอง โดย copy โฟลเดอร์ skill เข้า
-  `.claude/skills/` ของโปรเจกต์ที่จะทดสอบเอง
-- หรือส่งโฟลเดอร์ `template-update/` ให้เพื่อนร่วมทีม copy วางใน
-  `.claude/skills/` ของโปรเจกต์ทดสอบตรง ๆ โดยไม่ต้องผ่าน git เลยก็ได้
-  (skill เป็นแค่ text file ไม่ต้อง build/install)
-
----
-
-## 2. สำหรับทีมพัฒนา — pull skill มาใช้ในโปรเจกต์ตัวเอง
+## 1. สำหรับทีมพัฒนา — pull skill มาใช้ในโปรเจกต์ตัวเอง
 
 ทำตามนี้ทุกครั้งที่ต้องการเช็ค/อัปเดต template เวอร์ชันล่าสุดในโปรเจกต์ที่
 กำลังพัฒนาอยู่ (skill จะติดมาพร้อมกับการ merge template ปกติ ไม่ต้องทำ
@@ -117,7 +52,7 @@
    ```
 
    ถ้ายังไม่มีบรรทัดที่ขึ้นต้นด้วย `template` ให้เพิ่มก่อน (ใช้ URL ของ
-   template repo ที่ตรงกับประเภทโปรเจกต์ เช่น api-internal, api-gateway):
+   template repo ที่ตรงกับประเภทโปรเจกต์ เช่น api-internal, api-app):
 
    ```bash
    git remote add template {api-template-repository-url}
@@ -184,12 +119,13 @@
 
 ---
 
-## 3. คำถามที่พบบ่อย (FAQ)
+## 2. คำถามที่พบบ่อย (FAQ)
 
 **Q: พิมพ์ `/template-update` แล้ว Claude บอกว่าไม่รู้จัก command นี้**
 A: แปลว่าโปรเจกต์นั้นยังไม่มีโฟลเดอร์ `.claude/skills/template-update/`
-ให้เช็คว่ามีอยู่จริงในโปรเจกต์หรือไม่ ถ้าไม่มี ให้ merge template เวอร์ชัน
-ที่มี skill นี้เข้ามาก่อน หรือ copy โฟลเดอร์ skill เข้าไปเองตามข้อ 1
+ให้เช็คว่ามีอยู่จริงในโปรเจกต์หรือไม่ ถ้าไม่มี แปลว่า template repo กลาง
+ของโปรเจกต์นั้นยังไม่มี skill นี้ (หรือยังไม่ได้ merge เวอร์ชันที่มี skill
+เข้ามา) — ติดต่อผู้ดูแล template repo นั้นให้เพิ่ม skill เข้าไปก่อน
 
 **Q: เครื่องไม่มี `bun` ติดตั้งไว้ script จะรันได้ไหม**
 A: ได้ script เขียนด้วย Node.js API ธรรมดา ไม่ได้ใช้ฟีเจอร์เฉพาะของ Bun
@@ -218,17 +154,19 @@ working tree ไม่มีการ `git add`, `git commit`, หรือ `git
 **Q: อยากเพิ่ม config point ใหม่ที่ template เขียนทับซ้ำ ๆ (นอกเหนือจาก 5 จุดเดิม)**
 A: แก้ที่ `fileConfigs` ใน
 [`template-update/scripts/apply-config.mjs`](./template-update/scripts/apply-config.mjs)
-เพิ่ม pattern ใหม่ แล้วทำตามขั้นตอนข้อ 1 (อัปขึ้น template repo) อีกครั้ง
+เพิ่ม pattern ใหม่ในโฟลเดอร์นี้ แล้วส่งต่อให้ผู้ดูแล template repo แต่ละตัว
+นำเวอร์ชันที่แก้แล้วเข้า template repo กลางของตัวเอง (ขั้นตอนนั้นอยู่นอก
+ขอบเขตของ repo นี้)
 
 ---
 
-## 4. สรุปภาพรวม (สำหรับคนรีบ)
+## 3. สรุปภาพรวม (สำหรับคนรีบ)
 
 ```
-ผู้ดูแล skills_2569:  แก้/เพิ่ม skill -> copy เข้า template repo -> commit
-                       -> push -> สร้าง tag ใหม่บน GitLab
-                                                              |
-                                                              v
+skills_2569 (ที่นี่):  แก้/เพิ่ม skill ในโฟลเดอร์นี้
+                                   |
+                                   v  (ผู้ดูแลแต่ละ template repo นำเข้าเอง — นอกขอบเขตที่นี่)
+                                   v
 ทีมพัฒนา:  พิมพ์ /template-update (เช็คของใหม่ ไม่แก้ไฟล์) -> อ่านสรุป
            -> ยืนยัน merge -> git merge --squash {tag} -> ขอให้ reapply config
            -> ตรวจ git diff -> commit -> push
