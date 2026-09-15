@@ -1,6 +1,6 @@
 ---
 name: template-update
-description: ใช้เมื่อผู้ใช้ต้องการเช็คว่า template repo กลาง (remote ชื่อ "template" — api-gateway/api-internal/ฯลฯ แล้วแต่ประเภทโปรเจกต์) มีเวอร์ชันใหม่กว่าที่โปรเจกต์นี้ใช้อยู่หรือไม่, อยากรู้ว่า template implement อะไรใหม่บ้างก่อนตัดสินใจ merge, หรือเพิ่งรัน `git merge --squash {tag}` จาก template แล้วต้องแก้ config เฉพาะโปรเจกต์ที่ถูกเขียนทับกลับเป็น placeholder. Trigger เมื่อผู้ใช้พูดถึง "เช็ค template", "template มีอัปเดตไหม", "merge template", "sync template", "อัปเดต template เวอร์ชันล่าสุด" หรือ "แก้ TODO หลัง merge template".
+description: ใช้เมื่อผู้ใช้ต้องการเช็คว่า template repo กลาง (remote ชื่อ "template" — api-app/api-internal/ฯลฯ แล้วแต่ประเภทโปรเจกต์) มีเวอร์ชันใหม่กว่าที่โปรเจกต์นี้ใช้อยู่หรือไม่, อยากรู้ว่า template implement อะไรใหม่บ้างก่อนตัดสินใจ merge, หรือเพิ่งรัน `git merge --squash {tag}` จาก template แล้วต้องแก้ config เฉพาะโปรเจกต์ที่ถูกเขียนทับกลับเป็น placeholder. Trigger เมื่อผู้ใช้พูดถึง "เช็ค template", "template มีอัปเดตไหม", "merge template", "sync template", "อัปเดต template เวอร์ชันล่าสุด" หรือ "แก้ TODO หลัง merge template".
 ---
 
 # Template Update
@@ -19,7 +19,7 @@ template ต้องทำเองแยกต่างหาก (มนุษ
 ## ปัญหาที่ skill นี้แก้
 
 โปรเจกต์นี้ derive มาจาก template repo กลาง (remote ชื่อ `template` — คนละ
-URL กันตามประเภทโปรเจกต์ เช่น api-gateway ใช้ template repo หนึ่ง, api-internal
+URL กันตามประเภทโปรเจกต์ เช่น api-app ใช้ template repo หนึ่ง, api-internal
 ใช้อีก repo หนึ่ง แต่ทุกโปรเจกต์จะมี remote ชื่อ `template` ชี้ไปยัง repo ที่
 ถูกต้องของตัวเองเสมอ) ตามขั้นตอนใน [README.md](../../../README.md)
 หัวข้อ "ใช้ template เวอร์ชันล่าสุด":
@@ -145,7 +145,7 @@ Skill นี้อยู่ใน `.claude/skills/` ซึ่งไม่ถู�
 โปรเจกต์ใหม่ทุกตัวที่ clone จาก template ได้ skill นี้ติดไปด้วยโดยอัตโนมัติ
 ให้ copy โฟลเดอร์ `.claude/skills/template-update/` ไปไว้ใน template repo
 ที่เกี่ยวข้อง (แต่ละประเภทโปรเจกต์มี template repo ของตัวเอง เช่น
-api-gateway, api-internal — copy เข้าไปทุก template repo ที่ต้องการใช้)
+api-app, api-internal — copy เข้าไปทุก template repo ที่ต้องการใช้)
 แล้ว push ขึ้นเป็น tag ใหม่ — เป็นขั้นตอนที่ผู้ดูแล template ทำเองด้วยมือ
 (ไม่ใช่สิ่งที่ skill นี้ทำอัตโนมัติ ดูรายละเอียดในเอกสารประจำ skills
 collection ที่ต้นทางของ skill นี้)
