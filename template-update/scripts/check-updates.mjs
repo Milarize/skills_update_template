@@ -19,6 +19,11 @@ import { execFileSync } from "node:child_process";
 const TAG_SUFFIX = "-template";
 const TAG_RE = /^(\d+)\.(\d+)\.(\d+)-template$/;
 
+// Files apply-config.mjs already knows how to reapply project-specific
+// values for (see its `fileConfigs`) — no need to dump their full diff,
+// the stat/name-status line is enough. Keep this in sync with that list.
+const KNOWN_CONFIG_FILES = new Set([".gitlab-ci.yml", "package.json", "bun.lock"]);
+
 function sh(args) {
   return execFileSync("git", args, { encoding: "utf8" }).trim();
 }
@@ -158,6 +163,27 @@ if (summary.modified.length) {
   console.log("\nไฟล์ที่ template แก้ไข:");
   summary.modified.forEach((f) => console.log(`  ~ ${f}`));
 }
+
+// For modified files apply-config.mjs does NOT already handle, dump the
+// actual diff content (not just the filename) so the reviewer can see what
+// changed structurally (e.g. a new base class, a changed function
+// signature) instead of just "this file was touched".
+const filesNeedingContentReview = summary.modified.filter(
+  (f) => !KNOWN_CONFIG_FILES.has(f)
+);
+if (filesNeedingContentReview.length) {
+  console.log(
+    "\n== เนื้อการเปลี่ยนแปลงของไฟล์ที่ไม่ใช่ config point ที่ apply-config.mjs รู้จัก =="
+  );
+  console.log(
+    "(อ่านไฟล์เหล่านี้เพื่อประเมินว่ากระทบโค้ด/โครงสร้างที่โปรเจกต์นี้ custom ไว้เองหรือไม่)"
+  );
+  for (const file of filesNeedingContentReview) {
+    console.log(`\n--- ${file} ---`);
+    console.log(sh(["diff", `${baseline.tag}..${latest.tag}`, "--", file]));
+  }
+}
+
 if (summary.newTodos.length) {
   console.log(
     "\n[ควรดูเป็นพิเศษ] TODO ใหม่ที่ template เพิ่มเข้ามา (อาจเป็น config point ใหม่ที่ apply-config.mjs ยังไม่รู้จัก):"
@@ -168,3 +194,9 @@ if (summary.newTodos.length) {
 console.log(
   `\n>>> ยืนยันกับ dev ก่อนทำจริงเสมอ: ต้องการ merge template เวอร์ชัน "${latest.tag}" เข้ามาหรือไม่? <<<\nถ้าใช่ ขั้นตอนถัดไปคือ:\n  git merge --squash ${latest.tag}\nแล้วรัน apply-config.mjs เพื่อ reapply ค่า config เฉพาะโปรเจกต์`
 );
+
+if (filesNeedingContentReview.length) {
+  console.log(
+    "\n>>> ก่อนถามเรื่อง merge: อ่าน diff เนื้อไฟล์ด้านบนแล้วสรุปเป็นภาษาคนว่าแต่ละไฟล์เปลี่ยนอะไรเชิงโครงสร้าง/โค้ด (เช่น extend class ใหม่, เปลี่ยน signature, เพิ่ม dependency) ถ้าพบว่าโปรเจกต์นี้น่าจะมีโค้ดของตัวเองที่เกี่ยวข้องอยู่แล้ว ให้เสนอแนะและถามผู้ใช้อย่างชัดเจนว่าต้องการปรับโค้ดของโปรเจกต์ให้สอดคล้องด้วยหรือไม่ ก่อนจะไปถามเรื่อง merge <<<"
+  );
+}

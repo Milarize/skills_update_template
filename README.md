@@ -13,7 +13,7 @@
 
 | Skill | หน้าที่ |
 |---|---|
-| [`template-update/`](./template-update/SKILL.md) | เช็คว่า template repo กลางมีเวอร์ชันใหม่กว่าที่โปรเจกต์ใช้อยู่หรือไม่ พร้อมสรุปว่า implement อะไรใหม่บ้าง และ reapply ค่า config เฉพาะโปรเจกต์ (เช่น `DOCKER_IMAGE`, `SONAR_PROJECT_KEY`) หลัง merge ให้อัตโนมัติ |
+| [`template-update/`](./template-update/SKILL.md) | เช็คว่า template repo กลางมีเวอร์ชันใหม่กว่าที่โปรเจกต์ใช้อยู่หรือไม่ พร้อมสรุปว่า implement อะไรใหม่บ้าง (รวมถึงรีวิวเนื้อ diff ของไฟล์ที่ไม่ใช่ config point แล้วเสนอแนะ/ถามก่อนว่าควรปรับโค้ดโปรเจกต์ตามไหม) และ reapply ค่า config เฉพาะโปรเจกต์ (เช่น `DOCKER_IMAGE`, `SONAR_PROJECT_KEY`) หลัง merge ให้อัตโนมัติ |
 
 > **ขอบเขตสำคัญของทุก skill ในนี้:** อ่าน/ตรวจสอบเท่านั้น **ไม่มี skill ไหน
 > commit หรือ push ขึ้น git repo ใด ๆ เองโดยอัตโนมัติ** (รวมถึงไม่ push ขึ้น
