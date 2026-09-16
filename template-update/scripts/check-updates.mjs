@@ -146,6 +146,16 @@ function bestContentMatch(tags) {
   return { best, scored };
 }
 
+// Optional override: `node check-updates.mjs --baseline=0.7.0-template` skips
+// auto-detection entirely and trusts the caller instead. Meant for when
+// auto-detection is uncertain (baseline not found, or the content-based
+// cross-check below flags a mismatch) — ask the dev directly which version
+// they last updated to, then re-run with this flag instead of guessing.
+const overrideBaselineTag = process.argv
+  .slice(2)
+  .find((a) => a.startsWith("--baseline="))
+  ?.slice("--baseline=".length);
+
 console.log("== template-update: ตรวจสอบเวอร์ชัน template ใหม่ ==\n");
 
 const remote = getTemplateRemote();
@@ -166,7 +176,24 @@ if (tags.length === 0) {
 }
 
 const latest = tags[tags.length - 1];
-const baseline = findBaselineTag(tags);
+
+let baseline;
+let baselineSource;
+if (overrideBaselineTag) {
+  baseline = tags.find((t) => t.tag === overrideBaselineTag);
+  if (!baseline) {
+    console.error(
+      `\nไม่พบ "${overrideBaselineTag}" ในรายการ tag ของ template — tag ที่มีคือ: ${tags
+        .map((t) => t.tag)
+        .join(", ")}`
+    );
+    process.exit(1);
+  }
+  baselineSource = "ผู้ใช้ระบุเอง";
+} else {
+  baseline = findBaselineTag(tags);
+  baselineSource = "commit message";
+}
 
 if (!baseline) {
   console.log(
@@ -183,12 +210,14 @@ if (!baseline) {
     );
   }
   console.log(
-    "ถ้านี่คือการ merge template ครั้งแรกของโปรเจกต์ (หรือตัวเลขด้านบนสูงมาก) ให้ทำตาม README.md หัวข้อ \"การขึ้นโปรเจกต์ใหม่\" แทน"
+    '\n>>> ถามผู้ใช้ตรงๆ ว่า "ล่าสุดที่ merge/อัปเดต template มาเป็นเวอร์ชันอะไร (ถ้าจำได้)" แล้วรันสคริปต์นี้อีกครั้งพร้อม ' +
+      "`--baseline=X.Y.Z-template` ตามที่ผู้ใช้บอก เพื่อยืนยัน baseline แทนการเดา — ถ้าผู้ใช้บอกว่านี่คือ merge " +
+      'ครั้งแรกของโปรเจกต์ (หรือตัวเลขด้านบนสูงมาก) ให้ทำตาม README.md หัวข้อ "การขึ้นโปรเจกต์ใหม่" แทน <<<'
   );
   process.exit(0);
 }
 
-console.log(`\nBaseline (เวอร์ชันที่ใช้อยู่ตอนนี้): ${baseline.tag}`);
+console.log(`\nBaseline (เวอร์ชันที่ใช้อยู่ตอนนี้): ${baseline.tag} (ที่มา: ${baselineSource})`);
 console.log(`เวอร์ชันล่าสุดบน template: ${latest.tag}`);
 
 {
@@ -196,12 +225,12 @@ console.log(`เวอร์ชันล่าสุดบน template: ${latest
   const baselineScore = scored.find((s) => s.tag === baseline.tag);
   if (best && best.tag !== baseline.tag && baselineScore && best.lines < baselineScore.lines) {
     console.log(
-      `\n[ตรวจสอบเพิ่มเติม] คำเตือน: commit message บอกว่าโปรเจกต์นี้อยู่ที่ ${baseline.tag} ` +
+      `\n[ตรวจสอบเพิ่มเติม] คำเตือน: ${baselineSource} บอกว่าโปรเจกต์นี้อยู่ที่ ${baseline.tag} ` +
         `(diff เหลือ ${baselineScore.lines} บรรทัดเทียบไฟล์ template) แต่เทียบเนื้อไฟล์จริงแล้ว ` +
         `ใกล้เคียงกับ ${best.tag} มากกว่า (diff เหลือ ${best.lines} บรรทัด)\nอาจมีการ merge เวอร์ชัน ` +
         `ระหว่างทางไปแล้วจริง ๆ แต่ commit message ไม่ตรงรูปแบบ "X.Y.Z-template" (เช่น ถูก squash-merge ` +
-        `ทับตอน merge PR ในโปรเจกต์นี้เอง) ก่อนตัดสินใจ merge ต่อ แนะนำให้ตรวจสอบเองว่าจริง ๆ ใช้เวอร์ชันไหนอยู่ ` +
-        `ไม่ควรเชื่อแค่ baseline ที่เจอจาก commit message ด้านบนอย่างเดียว`
+        `ทับตอน merge PR ในโปรเจกต์นี้เอง) หรือผู้ใช้จำเวอร์ชันผิด ก่อนตัดสินใจ merge ต่อ แนะนำให้ถามผู้ใช้อีกครั้งเพื่อยืนยัน ` +
+        `ว่าจริง ๆ ใช้เวอร์ชันไหนอยู่ ไม่ควรเชื่อแค่ baseline ด้านบนอย่างเดียว`
     );
   }
 }
